@@ -1,0 +1,77 @@
+CLASS zcust_credit_entry DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
+
+  PUBLIC SECTION.
+    INTERFACES if_oo_adt_classrun.
+    METHODS create_credit_data.
+    METHODS flush_credit_data.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+CLASS zcust_credit_entry IMPLEMENTATION.
+
+  METHOD if_oo_adt_classrun~main.
+    out->write( 'Running' ).
+    me->flush_credit_data( ).
+    me->create_credit_data( ).
+    out->write( 'Credit card data inserted successfully' ).
+  ENDMETHOD.
+
+  METHOD create_credit_data.
+    DATA: lt_credit_cards TYPE TABLE OF zcredit_card,
+          wa_credit_card  TYPE zcredit_card,
+          lt_customers    TYPE TABLE OF zcustomer_master,
+          wa_customer     TYPE zcustomer_master,
+          o_rand_cc       TYPE REF TO cl_abap_random_int,
+          o_rand_dt       TYPE REF TO cl_abap_random_int,
+          o_rand_lim      TYPE REF TO cl_abap_random_int,
+          o_rand_num      TYPE REF TO cl_abap_random_int,
+          o_rand_part     TYPE REF TO cl_abap_random_int,
+          lv_cc_part1     TYPE p LENGTH 8,
+          lv_cc_part2     TYPE p LENGTH 8,
+          lv_cc_num       TYPE p LENGTH 16,
+          num_cards       TYPE i,
+          lv_limit_base   TYPE i.
+
+    " Initialize random number generators
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 2 max = 4 RECEIVING prng = o_rand_num ).
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 1 max = 2000 RECEIVING prng = o_rand_dt ).
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 10 max = 75 RECEIVING prng = o_rand_lim ).
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 10000000 max = 99999999 RECEIVING prng = o_rand_part ).
+
+    " Fetch all customers
+    SELECT * FROM zcustomer_master INTO TABLE @lt_customers.
+
+    LOOP AT lt_customers INTO wa_customer.
+      num_cards = o_rand_num->get_next( ).
+      DO num_cards TIMES.
+        CLEAR wa_credit_card.
+        lv_cc_part1 = o_rand_part->get_next( ).
+        lv_cc_part2 = o_rand_part->get_next( ).
+        lv_cc_num = lv_cc_part1 * 100000000 + lv_cc_part2.
+
+        " Ensure the credit limit ends in 000
+        lv_limit_base = o_rand_lim->get_next( ) * 1000.
+
+        wa_credit_card-client = sy-mandt.
+        wa_credit_card-id = wa_customer-id.
+        wa_credit_card-cr_no = lv_cc_num.
+        wa_credit_card-issue_date = sy-datum - o_rand_dt->get_next( ).
+        wa_credit_card-cr_limit = lv_limit_base.
+        wa_credit_card-currency = 'INR'.
+        APPEND wa_credit_card TO lt_credit_cards.
+      ENDDO.
+    ENDLOOP.
+
+    INSERT zcredit_card FROM TABLE @lt_credit_cards.
+  ENDMETHOD.
+
+  METHOD flush_credit_data.
+    " Clear existing credit card data
+    DELETE FROM zcredit_card.
+  ENDMETHOD.
+
+ENDCLASS.

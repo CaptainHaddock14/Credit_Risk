@@ -1,0 +1,23 @@
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Customer Projection View'
+@Metadata.ignorePropagatedAnnotations: true
+@Metadata.allowExtensions: true
+define root view entity ZC_CUSTOMER_PARENT
+  provider contract transactional_query
+  as projection on ZI_CUSTOMER_PARENT
+{
+  key Id,
+      Name,
+      Address,
+      @Semantics.amount.currencyCode: 'currency'
+      Total_Limit,
+      @Semantics.amount.currencyCode: 'currency'
+      Limit_used,
+      @Semantics.amount.currencyCode: 'currency'
+      Limit_left,
+      Currency,
+      Credit_Score,
+      Risk,
+      /* Associations */
+      _credit : redirected to composition child ZC_CREDIT_CHILD
+}

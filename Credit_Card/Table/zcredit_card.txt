@@ -1,0 +1,16 @@
+@EndUserText.label : 'Credit Card Table'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zcredit_card {
+
+  key client : abap.clnt not null;
+  key id     : abap.char(5) not null;
+  key cr_no  : abap.char(16) not null;
+  issue_date : abap.dats not null;
+  @Semantics.amount.currencyCode : 'zcredit_card.currency'
+  cr_limit   : abap.curr(10,2) not null;
+  currency   : abap.cuky not null;
+
+}

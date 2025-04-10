@@ -1,0 +1,18 @@
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'TRANSACTION CHILD Projection VIEW'
+@Metadata.ignorePropagatedAnnotations: true
+@Metadata.allowExtensions: true
+define view entity ZC_TRANSACTION_CHILD as projection on ZITRANSACTION_child1
+{
+    key Id,
+    key Cr_No,
+    key Tr_No,
+    Tr_Date,
+    @Semantics.amount.currencyCode : 'Currency'
+    Amount,
+    Currency,
+    crid,
+    /* Associations */
+    _CUST : redirected to ZC_CUSTOMER_PARENT,
+    _credit : redirected to parent ZC_CREDIT_CHILD
+}

@@ -1,0 +1,17 @@
+@EndUserText.label : 'TRANSACTION TABLE'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table ztransaction_cr {
+
+  key client : abap.clnt not null;
+  key tr_no  : abap.char(5) not null;
+  key id     : abap.char(5) not null;
+  key cr_no  : abap.char(16) not null;
+  tr_date    : abap.dats not null;
+  @Semantics.amount.currencyCode : 'zcredit_card.currency'
+  amount     : abap.curr(10,2) not null;
+  currency   : abap.cuky not null;
+
+}

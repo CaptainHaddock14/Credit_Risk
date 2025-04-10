@@ -1,0 +1,23 @@
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'BASIC CUSTOMER VIEW'
+@Metadata.ignorePropagatedAnnotations: true
+define root view entity ZI_CUSTOMER_PARENT
+  as select from zcustomer_master
+  composition [0..*] of ZICredit_child1 as _credit
+  association [1..*] to Zamdp_VIEW1  as _amdp on  $projection.Id     = _amdp.id
+                                            
+{ 
+  key id      as Id,
+      name    as Name,
+      address as Address,
+      @Semantics.amount.currencyCode: 'currency'
+      _amdp.total_limit as Total_Limit,
+      @Semantics.amount.currencyCode: 'currency'
+      _amdp.limit_used as Limit_used,
+      @Semantics.amount.currencyCode: 'currency'
+      _amdp.limit_left as Limit_left,
+      _amdp.currency as Currency,
+      _amdp.credit_score as Credit_Score,
+      _amdp.risk_factor as Risk,
+      _credit
+}

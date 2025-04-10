@@ -1,0 +1,65 @@
+managed implementation in class zbp_i_customer_parent unique;
+strict ( 2 );
+
+define behavior for ZI_CUSTOMER_PARENT //alias <alias_name>
+persistent table zcustomer_master
+lock master
+authorization master ( instance )
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+  field ( mandatory : create, readonly : update ) Id;
+  association _credit { create; }
+
+  mapping for zcustomer_master{
+  Id = id;
+  Name = name;
+  Address = address;
+  }
+}
+
+define behavior for ZICredit_child1 //alias <alias_name>
+persistent table zcredit_card
+lock dependent by _CUST
+authorization dependent by _CUST
+//etag master <field_name>
+{
+  update;
+  delete;
+  field ( mandatory : create, readonly : update ) Id, Card_no;
+  association _CUST;
+  association _trans { create; }
+
+  mapping for zcredit_card{
+  Id = id;
+  Card_no = cr_no;
+  Issue_Date = issue_date;
+  Credit_Limit = cr_limit;
+  Currency = currency;
+  }
+}
+
+define behavior for ZITRANSACTION_child1 //alias <alias_name>
+persistent table ztransaction_cr
+lock dependent by _CUST
+authorization dependent by _CUST
+//etag master <field_name>
+{
+  update;
+  delete;
+  field ( mandatory : create, readonly : update ) Id, Cr_No, Tr_No;
+  field ( readonly:update ) CrID;
+  association _CUST;
+  association _credit;
+
+  mapping for Ztransaction_Cr{
+  Id = id;
+  Cr_No = cr_no;
+  Tr_No = tr_no;
+  Tr_Date = tr_date;
+  Amount = amount;
+  Currency = currency;
+  }
+}

@@ -1,0 +1,16 @@
+@EndUserText.label: 'AMDP TF'
+define table function Zamdp_tf1
+returns
+{
+  client        : abap.clnt;
+  id            : abap.char(5);
+  name          : abap.char(30);
+  total_limit   : abap.curr(15,2);
+  limit_used    : abap.curr(15,2);
+  limit_left    : abap.curr(15,2);
+  currency      : abap.cuky;
+  risk_factor   : abap.char(10);
+  credit_score  : abap.dec(7,4); 
+}
+implemented by method
+  ZCL_AMDP_TF=>GET_CREDIT_RISK;

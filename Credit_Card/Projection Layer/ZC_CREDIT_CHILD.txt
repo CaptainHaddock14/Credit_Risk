@@ -1,0 +1,16 @@
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Credit Child Projection View'
+@Metadata.ignorePropagatedAnnotations: true
+@Metadata.allowExtensions: true
+define view entity ZC_CREDIT_CHILD as projection on ZICredit_child1
+{
+    key Id,
+    key Card_no,
+    Issue_Date,
+    @Semantics.amount.currencyCode : 'Currency'
+    Credit_Limit,
+    Currency,
+    /* Associations */
+    _CUST : redirected to parent ZC_CUSTOMER_PARENT,
+    _trans : redirected to composition child ZC_TRANSACTION_CHILD
+}

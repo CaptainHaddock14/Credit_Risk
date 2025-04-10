@@ -1,0 +1,23 @@
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Credit Child View'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+define view entity ZICredit_child1
+  as select from zcredit_card
+  composition [0..*] of ZITRANSACTION_child1 as _trans
+  association to parent ZI_CUSTOMER_PARENT   as _CUST on $projection.Id = _CUST.Id
+{
+  key id         as Id,
+  key cr_no      as Card_no,
+      issue_date as Issue_Date,
+      @Semantics.amount.currencyCode : 'Currency'
+      cr_limit   as Credit_Limit,
+      currency   as Currency,
+      _CUST,
+      _trans
+}

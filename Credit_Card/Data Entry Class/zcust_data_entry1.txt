@@ -1,0 +1,144 @@
+CLASS zcust_data_entry1 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
+
+  PUBLIC SECTION.
+    INTERFACES if_oo_adt_classrun.
+    METHODS create_customer_data.
+    METHODS flush_customer_data.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+CLASS zcust_data_entry1 IMPLEMENTATION.
+
+  METHOD if_oo_adt_classrun~main.
+    flush_customer_data( ).
+    create_customer_data( ).
+    IF sy-subrc = 0.
+      out->write( 'Customer data inserted successfully' ).
+    ELSE.
+      out->write( 'Failed to insert customer data' ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD create_customer_data.
+    DATA: lt_customers TYPE TABLE OF zcustomer_master,
+          wa_customer TYPE zcustomer_master.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0001'.
+    wa_customer-name = 'Amit Sharma'.
+    wa_customer-address = 'Delhi'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0002'.
+    wa_customer-name = 'Priya Verma'.
+    wa_customer-address = 'Mumbai'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0003'.
+    wa_customer-name = 'Rahul Gupta'.
+    wa_customer-address = 'Bengaluru'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0004'.
+    wa_customer-name = 'Sneha Iyer'.
+    wa_customer-address = 'Chennai'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0005'.
+    wa_customer-name = 'Vikram Singh'.
+    wa_customer-address = 'Hyderabad'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0006'.
+    wa_customer-name = 'Neha Joshi'.
+    wa_customer-address = 'Pune'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0007'.
+    wa_customer-name = 'Suresh Kumar'.
+    wa_customer-address = 'Kolkata'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0008'.
+    wa_customer-name = 'Anjali Mehta'.
+    wa_customer-address = 'Ahmedabad'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0009'.
+    wa_customer-name = 'Manish Reddy'.
+    wa_customer-address = 'Visakhapatnam'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0010'.
+    wa_customer-name = 'Kavita Nair'.
+    wa_customer-address = 'Kochi'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0011'.
+    wa_customer-name = 'Rohan Patil'.
+    wa_customer-address = 'Nagpur'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0012'.
+    wa_customer-name = 'Divya Choudhary'.
+    wa_customer-address = 'Jaipur'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0013'.
+    wa_customer-name = 'Arjun Malhotra'.
+    wa_customer-address = 'Chandigarh'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0014'.
+    wa_customer-name = 'Swati Bansal'.
+    wa_customer-address = 'Lucknow'.
+    APPEND wa_customer TO lt_customers.
+
+    CLEAR wa_customer.
+    wa_customer-client = sy-mandt.
+    wa_customer-id = 'C0015'.
+    wa_customer-name = 'Harsh Vardhan'.
+    wa_customer-address = 'Bhubaneswar'.
+    APPEND wa_customer TO lt_customers.
+
+    INSERT zcustomer_master FROM TABLE @lt_customers.
+  ENDMETHOD.
+
+  METHOD flush_customer_data.
+    " Clear existing customer data
+    DELETE FROM zcustomer_master.
+  ENDMETHOD.
+
+ENDCLASS.

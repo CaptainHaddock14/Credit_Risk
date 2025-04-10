@@ -1,0 +1,13 @@
+@EndUserText.label : 'CUSTOMER MASTER TABLE'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zcustomer_master {
+
+  key client : abap.clnt not null;
+  key id     : abap.char(5) not null;
+  name       : abap.char(30) not null;
+  address    : abap.char(10);
+
+}

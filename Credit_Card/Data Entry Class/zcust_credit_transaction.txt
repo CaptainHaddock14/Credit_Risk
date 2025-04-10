@@ -1,0 +1,126 @@
+CLASS zcust_credit_transaction DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
+
+  PUBLIC SECTION.
+    INTERFACES if_oo_adt_classrun.
+    METHODS:
+      create_transaction_data RETURNING VALUE(rv_success) TYPE abap_bool,
+      flush_transaction_data RETURNING VALUE(rv_success) TYPE abap_bool.
+
+  PRIVATE SECTION.
+    METHODS:
+      generate_transaction
+        IMPORTING
+          iv_credit_card    TYPE zcredit_card
+          iv_transaction_id TYPE string
+        RETURNING VALUE(rs_trans) TYPE ztransaction_cr,
+      validate_transaction
+        IMPORTING
+          is_transaction  TYPE ztransaction_cr
+          iv_total_spent  TYPE p
+          iv_max_spent    TYPE p
+        RETURNING VALUE(rv_valid) TYPE abap_bool.
+ENDCLASS.
+
+CLASS zcust_credit_transaction IMPLEMENTATION.
+
+  METHOD if_oo_adt_classrun~main.
+    out->write( 'Starting transaction data generation' ).
+    IF NOT flush_transaction_data( ).
+      out->write( 'Failed to flush existing transaction data' ).
+      RETURN.
+    ENDIF.
+    IF create_transaction_data( ).
+      out->write( 'Transaction data inserted successfully' ).
+    ELSE.
+      out->write( 'Failed to insert transaction data' ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD create_transaction_data.
+    DATA: lt_transactions TYPE TABLE OF ztransaction_cr,
+          lt_credit_cards TYPE TABLE OF zcredit_card,
+          lv_total_spent TYPE p DECIMALS 2,
+          lv_max_spent TYPE p DECIMALS 2,
+          lv_limit_factor TYPE p DECIMALS 2 VALUE '0.55',
+          lv_tr_count TYPE i,
+          lv_tr_counter TYPE i VALUE 1,
+          o_rand_tr_count TYPE REF TO cl_abap_random_int,
+          o_rand_tr_date TYPE REF TO cl_abap_random_int,
+          o_rand_amount TYPE REF TO cl_abap_random_int,
+          lv_transaction_id TYPE string.
+
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 2 max = 6 RECEIVING prng = o_rand_tr_count ).
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 1 max = 365 RECEIVING prng = o_rand_tr_date ).
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 500 max = 10000 RECEIVING prng = o_rand_amount ).
+
+    SELECT * FROM zcredit_card INTO TABLE @lt_credit_cards.
+    IF lt_credit_cards IS INITIAL.
+      rv_success = abap_false.
+      RETURN.
+    ENDIF.
+
+    LOOP AT lt_credit_cards INTO DATA(ls_credit_card).
+      lv_total_spent = 0.
+      lv_max_spent = ls_credit_card-cr_limit * lv_limit_factor.
+      lv_tr_count = o_rand_tr_count->get_next( ).
+
+      DO lv_tr_count TIMES.
+        lv_transaction_id = |T{ lv_tr_counter WIDTH = 4 PAD = '0' }|.
+
+        DATA(ls_transaction) = generate_transaction(
+          iv_credit_card = ls_credit_card
+          iv_transaction_id = lv_transaction_id
+        ).
+
+        IF validate_transaction(
+             is_transaction = ls_transaction
+             iv_total_spent = lv_total_spent
+             iv_max_spent = lv_max_spent
+           ).
+          APPEND ls_transaction TO lt_transactions.
+          lv_total_spent = lv_total_spent + ls_transaction-amount.
+          lv_tr_counter = lv_tr_counter + 1.
+        ENDIF.
+      ENDDO.
+    ENDLOOP.
+
+    IF lt_transactions IS NOT INITIAL.
+      INSERT ztransaction_cr FROM TABLE @lt_transactions ACCEPTING DUPLICATE KEYS.
+      rv_success = xsdbool( sy-subrc = 0 ).
+    ELSE.
+      rv_success = abap_false.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD flush_transaction_data.
+    DELETE FROM ztransaction_cr.
+    rv_success = xsdbool( sy-subrc = 0 OR sy-subrc = 4 ).
+  ENDMETHOD.
+
+  METHOD generate_transaction.
+    DATA: o_rand_date TYPE REF TO cl_abap_random_int,
+          o_rand_amount TYPE REF TO cl_abap_random_int,
+          lv_id TYPE zcredit_card-id.
+
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 1 max = 365 RECEIVING prng = o_rand_date ).
+    cl_abap_random_int=>create( EXPORTING seed = cl_abap_random=>seed( ) min = 500 max = 10000 RECEIVING prng = o_rand_amount ).
+
+    SELECT SINGLE id FROM zcredit_card WHERE cr_no = @iv_credit_card-cr_no into @lv_id.
+
+    rs_trans-client = sy-mandt.
+    rs_trans-tr_no = iv_transaction_id.
+    rs_trans-id = lv_id.
+    rs_trans-cr_no = iv_credit_card-cr_no.
+    rs_trans-tr_date = sy-datum - o_rand_date->get_next( ).
+    rs_trans-amount = o_rand_amount->get_next( ).
+    rs_trans-currency = iv_credit_card-currency.
+  ENDMETHOD.
+
+  METHOD validate_transaction.
+    rv_valid = xsdbool( iv_total_spent + is_transaction-amount <= iv_max_spent ).
+  ENDMETHOD.
+
+ENDCLASS.

@@ -1,0 +1,47 @@
+CLASS ZCL_AMDP_TF DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES IF_AMDP_MARKER_HDB.
+    CLASS-METHODS GET_CREDIT_RISK
+      FOR TABLE FUNCTION ZAMDP_TF1.
+
+ENDCLASS.
+
+CLASS ZCL_AMDP_TF IMPLEMENTATION.
+
+  METHOD GET_CREDIT_RISK BY DATABASE FUNCTION
+    FOR HDB LANGUAGE SQLSCRIPT
+    OPTIONS READ-ONLY
+    USING zcustomer_master zcredit_card ztransaction_cr.
+
+    RETURN
+      SELECT
+        c.client,
+        c.id,
+        c.name,
+        COALESCE(SUM(cr.cr_limit), 0) AS total_limit,
+        COALESCE(SUM(tr.amount), 0) AS limit_used,
+        COALESCE(SUM(cr.cr_limit), 0) - COALESCE(SUM(tr.amount), 0) AS limit_left,
+        cr.currency,
+        CASE
+          WHEN (COALESCE(SUM(tr.amount), 0) / NULLIF(COALESCE(SUM(cr.cr_limit), 0), 0)) * 100 > 75
+            THEN 'High'
+          WHEN (COALESCE(SUM(tr.amount), 0) / NULLIF(COALESCE(SUM(cr.cr_limit), 0), 0)) * 100 > 45
+            THEN 'Medium'
+          ELSE 'Low'
+        END AS risk_factor,
+        ROUND(((COALESCE(SUM(cr.cr_limit), 0) - COALESCE(SUM(tr.amount), 0)) /
+              NULLIF(COALESCE(SUM(cr.cr_limit), 0), 0)) * 100, 4) AS credit_score
+      FROM zcustomer_master AS c
+      LEFT JOIN zcredit_card AS cr
+        ON c.client = cr.client AND c.id = cr.id
+      LEFT JOIN ztransaction_cr AS tr
+        ON c.client = tr.client AND cr.id = tr.id AND cr.cr_no = tr.cr_no
+      GROUP BY c.client, c.id, c.name, cr.currency;
+
+  ENDMETHOD.
+
+ENDCLASS.

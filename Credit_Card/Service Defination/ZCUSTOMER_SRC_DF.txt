@@ -1,0 +1,6 @@
+@EndUserText.label: 'Customer Service Definition'
+define service ZCUSTOMER_SRC_DF {
+  expose ZC_CUSTOMER_PARENT;
+  expose ZC_CREDIT_CHILD;
+  expose ZC_TRANSACTION_CHILD;
+}

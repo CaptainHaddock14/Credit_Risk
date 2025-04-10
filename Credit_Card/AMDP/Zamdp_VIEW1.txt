@@ -1,0 +1,23 @@
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'AMDP VIEW1'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+define view entity Zamdp_VIEW1 as select from Zamdp_tf1
+{
+    id,
+    name,
+    @Semantics.amount.currencyCode: 'currency'
+    total_limit,
+    @Semantics.amount.currencyCode: 'currency'
+    limit_used,
+    @Semantics.amount.currencyCode: 'currency'
+    limit_left,
+    risk_factor,
+    currency,
+    credit_score
+}
